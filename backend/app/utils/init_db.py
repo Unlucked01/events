@@ -33,7 +33,6 @@ def create_admin():
             full_name="Администратор",
             phone="0000000000",
             is_active=True,
-            telegram_chat_id="@unlucked"
         )
         db.add(admin)
         db.commit()

@@ -5,6 +5,7 @@ from .users import router as users_router
 from .events import router as events_router
 from .invitations import router as invitations_router
 from .participations import router as participations_router
+from .telegram import router as telegram_router
 
 router = APIRouter()
 
@@ -13,5 +14,6 @@ router.include_router(users_router)
 router.include_router(events_router)
 router.include_router(invitations_router)
 router.include_router(participations_router)
+router.include_router(telegram_router)
 
 __all__ = ["router"] 

@@ -4,11 +4,12 @@ services:
   # Backend API service
   backend:
     build: ./backend
-    restart: always
-    ports:
-      - "8000:8000"
+    container_name: events-backend
     env_file:
       - ./backend/.env
+    ports:
+      - "8000:8000"
+    restart: always
     volumes:
       - ./backend:/app
       - uploads_data:/app/app/static/uploads
@@ -18,25 +19,21 @@ services:
       - app_network
   
   # Frontend service
-  # frontend:
-  #   build: ./frontend
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - NEXT_PUBLIC_API_URL=http://localhost:8000
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - app_network
+  frontend:
+    build: ./frontend_v2
+    container_name: events-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://unl-events.duckdns.org/api
+    depends_on:
+      - backend
+    restart: always
   
   # Database service
   db:
-    image: postgres:13
-    restart: always
+    image: postgres:15
+    container_name: events-db
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres

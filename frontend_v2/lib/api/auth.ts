@@ -21,7 +21,7 @@ export interface User {
   phone: string;
   avatar?: string;
   profile_picture?: string;
-  telegram_username?: string;
+  telegram_chat_id?: string;
   created_at: string;
 }
 

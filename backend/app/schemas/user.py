@@ -11,7 +11,6 @@ class UserBase(BaseModel):
 # User Creation Schema
 class UserCreate(UserBase):
     password: str
-    telegram_username: Optional[str] = None
     
     @validator('password')
     def password_strength(cls, v):
@@ -26,14 +25,13 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     profile_picture: Optional[str] = None
     password: Optional[str] = None
-    telegram_username: Optional[str] = None
 
 # User Display Schema
 class UserDisplay(UserBase):
     id: int
     profile_picture: Optional[str] = None
-    telegram_username: Optional[str] = None
     created_at: datetime
+    telegram_chat_id: Optional[str] = None
     
     class Config:
         from_attributes = True

@@ -14,7 +14,6 @@ class User(Base, BaseModel):
     profile_picture = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     telegram_chat_id = Column(String, nullable=True)
-    telegram_username = Column(String, nullable=True)  # Telegram username for sending invitations
     
     # Relationships
     events = relationship("Event", back_populates="creator", cascade="all, delete-orphan")

@@ -39,6 +39,7 @@ import { profileService, authService, eventsService, subscriptionsService } from
 import { User } from '@/lib/api/auth';
 import { Event } from '@/lib/api/events';
 import { resolveImageUrl } from '@/lib/utils/image';
+import { getTelegramLinkToken } from '@/lib/api/telegram';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -51,7 +52,6 @@ export default function ProfilePage() {
     username: '',
     fullName: '',
     phone: '',
-    telegramUsername: '',
   });
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -61,6 +61,9 @@ export default function ProfilePage() {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [telegramLinkUrl, setTelegramLinkUrl] = useState<string | null>(null);
+  const [telegramLinkLoading, setTelegramLinkLoading] = useState(false);
+
 
   useEffect(() => {
     // Fetch current user data
@@ -79,7 +82,6 @@ export default function ProfilePage() {
           username: user.username,
           fullName: user.full_name,
           phone: user.phone,
-          telegramUsername: user.telegram_username || '',
         });
         
         // Fetch user events with proper pagination
@@ -171,7 +173,6 @@ export default function ProfilePage() {
         username: userData.username,
         fullName: userData.full_name,
         phone: userData.phone,
-        telegramUsername: userData.telegram_username || '',
       });
       setAvatarPreview(null);
     }
@@ -205,7 +206,6 @@ export default function ProfilePage() {
           username: formData.username,
           full_name: formData.fullName,
           phone: formData.phone,
-          telegram_username: formData.telegramUsername,
         });
         
         // Update avatar if a new one was selected
@@ -223,6 +223,28 @@ export default function ProfilePage() {
       setError('Не удалось обновить профиль');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const fetchUserData = async () => {
+    const user = await authService.getCurrentUser();
+    setUserData(user);
+  };
+
+  const handleTelegramLink = async () => {
+    setTelegramLinkLoading(true);
+    try {
+      const link = await getTelegramLinkToken();
+      setTelegramLinkUrl(link);
+      window.open(link, '_blank');
+      // Через 10 секунд обновить профиль
+      setTimeout(() => {
+        fetchUserData();
+      }, 10000);
+    } catch (err: any) {
+      setError(err.message || 'Не удалось получить ссылку для Telegram.');
+    } finally {
+      setTelegramLinkLoading(false);
     }
   };
 
@@ -349,22 +371,6 @@ export default function ProfilePage() {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField
-                        label="Telegram Username"
-                        name="telegramUsername"
-                        value={formData.telegramUsername}
-                        onChange={handleChange}
-                        fullWidth
-                        required
-                        disabled={submitting}
-                        InputProps={{
-                          startAdornment: (
-                            <Person color="primary" sx={{ mr: 1 }} />
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
                       <Button
                         type="submit"
                         variant="contained"
@@ -412,16 +418,24 @@ export default function ProfilePage() {
                     {userData.phone}
                   </Typography>
                   
-                  {userData.telegram_username && (
-                    <>
-                      <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-                        Telegram:
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        @{userData.telegram_username.replace('@', '')}
-                      </Typography>
-                    </>
+                 <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+                    Telegram:
+                  </Typography>
+                  {userData.telegram_chat_id ? (
+                    <Typography variant="body1" gutterBottom color="success.main">
+                      Привязан (ID: {userData.telegram_chat_id})
+                    </Typography>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      onClick={handleTelegramLink}
+                      disabled={telegramLinkLoading}
+                      sx={{ mt: 1 }}
+                    >
+                      {telegramLinkLoading ? 'Загрузка...' : 'Привязать Telegram'}
+                    </Button>
                   )}
+
                 </Box>
               </Grid>
               

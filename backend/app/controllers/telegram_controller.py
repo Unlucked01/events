@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from ..models import User, Event, EventParticipant, Invitation, Subscription
 from ..config.database import SessionLocal
 from ..repositories import EventRepository, ParticipationRepository
+from ..services.telegram_deeplink_service import TelegramLinkService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -136,26 +137,6 @@ class TelegramController:
                     return True
                 except Exception as e:
                     logger.error(f"Error sending message via chat_id (direct): {e}")
-                    # Fall through to try username
-            
-            # Try username if available
-            if recipient.telegram_username:
-                try:
-                    # Clean username (remove @ if present)
-                    username = recipient.telegram_username.replace('@', '')
-                    logger.info(f"Sending message to user {recipient.id} via username {username} (direct)")
-                    
-                    # Отправляем напрямую по имени пользователя без @
-                    await bot.send_message(
-                        chat_id=username,  # Убираем @ при отправке
-                        text=message,
-                        parse_mode=parse_mode,
-                        reply_markup=keyboard
-                    )
-                    logger.info(f"Message sent to user {recipient.id} via username {username} (direct)")
-                    return True
-                except Exception as e:
-                    logger.error(f"Error sending message via username (direct): {e}")
         
         # If VPS API and direct methods both failed
         logger.warning(f"Could not contact user {recipient.id} via Telegram (all methods failed).")
@@ -406,10 +387,6 @@ class TelegramController:
                 logger.info(f"No followers found for user {creator_id}")
                 return True
             
-            # Log follower details for debugging
-            for follower in followers:
-                logger.info(f"Follower: id={follower.id}, name={follower.full_name}, telegram_username={follower.telegram_username}, chat_id={follower.telegram_chat_id}")
-            
             # Format message
             event_date = event.event_date.strftime("%d.%m.%Y %H:%M")
             if is_update:
@@ -464,8 +441,30 @@ class TelegramController:
 if bot and dp:
     @router.message(Command("start"))
     async def start_command(message: Message):
-        # Печатаем ID чата для диагностики
-        await message.answer(f"👋 Привет! Я бот для организации мероприятий.\n\nВаш chat_id: {message.chat.id}\nИспользуйте его для привязки аккаунта.")
+        args = message.text.split()
+        chat_id = message.chat.id
+        username = message.from_user.username
+
+        if len(args) == 2 and args[1].startswith("link_"):
+            token = args[1]
+            db = SessionLocal()
+            try:
+                user = TelegramLinkService.get_user_by_token(db, token)
+                if user:
+                    user.telegram_chat_id = str(chat_id)
+                    db.commit()
+
+                    await message.answer("✅ Ваш Telegram успешно привязан к аккаунту!")
+                else:
+                    await message.answer("❌ Ссылка недействительна или устарела.")
+            except Exception as e:
+                logger.error(f"Failed to link Telegram: {e}")
+                await message.answer("❌ Произошла ошибка. Попробуйте позже.")
+            finally:
+                db.close()
+        else:
+            await message.answer("👋 Привет! Я бот для уведомлений. Используйте команду /link для привязки.")
+
 
     @router.message(Command("help"))
     async def help_command(message: Message):

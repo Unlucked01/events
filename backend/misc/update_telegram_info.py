@@ -9,7 +9,7 @@ import os
 from app.config.database import SessionLocal
 from app.models import User
 
-def update_user_telegram_info(user_id, telegram_chat_id, telegram_username=None):
+def update_user_telegram_info(user_id, telegram_chat_id):
     """Обновить информацию Telegram для пользователя"""
     db = SessionLocal()
     try:
@@ -21,13 +21,10 @@ def update_user_telegram_info(user_id, telegram_chat_id, telegram_username=None)
         
         # Обновить информацию
         user.telegram_chat_id = telegram_chat_id
-        if telegram_username:
-            user.telegram_username = telegram_username
         
         db.commit()
         print(f"Успешно обновлена информация Telegram для пользователя {user.full_name} (ID: {user.id})")
         print(f"  - telegram_chat_id: {user.telegram_chat_id}")
-        print(f"  - telegram_username: {user.telegram_username}")
         return True
     
     except Exception as e:
@@ -38,14 +35,13 @@ def update_user_telegram_info(user_id, telegram_chat_id, telegram_username=None)
 
 def main():
     if len(sys.argv) < 3:
-        print("Использование: python update_telegram_info.py <user_id> <telegram_chat_id> [telegram_username]")
+        print("Использование: python update_telegram_info.py <user_id> <telegram_chat_id>")
         sys.exit(1)
     
     user_id = int(sys.argv[1])
     telegram_chat_id = sys.argv[2]
-    telegram_username = sys.argv[3] if len(sys.argv) > 3 else None
     
-    update_user_telegram_info(user_id, telegram_chat_id, telegram_username)
+    update_user_telegram_info(user_id, telegram_chat_id)
 
 if __name__ == "__main__":
     main() 

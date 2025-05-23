@@ -20,7 +20,9 @@ async def get_current_user_profile(
     db: Session = Depends(get_db)
 ):
     """Get current user profile."""
-    return UserService.get_user_by_id(db, current_user.id)
+    user = UserService.get_user_by_id(db, current_user.id)
+    print('User from DB:', user.__dict__)
+    return user
 
 @router.get("/{user_id}", response_model=UserDetail)
 async def get_user_profile(
@@ -35,7 +37,6 @@ async def update_profile(
     username: str = Form(None),
     full_name: str = Form(None),
     phone: str = Form(None),
-    telegram_username: str = Form(None),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -44,8 +45,7 @@ async def update_profile(
     user_data = UserUpdate(
         username=username, 
         full_name=full_name,
-        phone=phone,
-        telegram_username=telegram_username
+        phone=phone
     )
     return await UserService.update_user(db, current_user.id, user_data, current_user)
 
