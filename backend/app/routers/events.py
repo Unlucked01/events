@@ -69,6 +69,7 @@ async def create_event(
     event = await EventService.create_event(db, event_data, images, current_user)
     
     # Send invitations in the background
+    logger.info(f"Sending bulk invitations for event {event['id']} to {BASE_URL}")
     background_tasks.add_task(
         TelegramController.send_bulk_invitations,
         event['id'],

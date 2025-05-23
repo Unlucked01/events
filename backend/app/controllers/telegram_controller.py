@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 # Initialize bot and dispatcher
 load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-BASE_URL = os.getenv("BASE_URL", "http://localhost:3000")
-VPS_API_URL = os.getenv("VPS_API_URL", "http://your-vps-ip:5000")
+BASE_URL = os.getenv("BASE_URL", "https://unl-events.duckdns.org")
+VPS_API_URL = os.getenv("VPS_API_URL", "http://unl-events.duckdns.org:5000")
 VPS_API_KEY = os.getenv("VPS_API_KEY", "your-secret-api-key")
 
 # We'll keep these for local development, but primarily use the VPS forwarding
