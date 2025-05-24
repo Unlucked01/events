@@ -21,7 +21,6 @@ async def get_current_user_profile(
 ):
     """Get current user profile."""
     user = UserService.get_user_by_id(db, current_user.id)
-    print('User from DB:', user.__dict__)
     return user
 
 @router.get("/search", response_model=List[UserDisplay])
