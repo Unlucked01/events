@@ -14,7 +14,7 @@ export interface SubscriptionResponse {
 export interface UserSearchParams {
   page?: number;
   limit?: number;
-  search?: string;
+  query?: string;
   skip?: number;
 }
 
@@ -45,10 +45,10 @@ const subscriptionsService = {
   // Поиск пользователей
   searchUsers: async (params: UserSearchParams = {}): Promise<PaginatedResponse<User> | User[]> => {
     // Преобразуем параметры для соответствия API
-    const { search, page, limit, skip, ...rest } = params;
+    const { query, page, limit, skip, ...rest } = params;
     const apiParams: any = { ...rest };
 
-    if (search) apiParams.query = search;
+    if (query) apiParams.query = query;
     if (typeof limit === 'number') apiParams.limit = limit;
     if (typeof skip === 'number') {
       apiParams.skip = skip;

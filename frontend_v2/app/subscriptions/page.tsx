@@ -100,7 +100,7 @@ export default function SubscriptionsPage() {
     
     setSearchLoading(true);
     try {
-      const results = await subscriptionsService.searchUsers({ search: term });
+      const results = await subscriptionsService.searchUsers({ query: term });
       // Handle both array and paginated responses
       if (Array.isArray(results)) {
         setSearchResults(results);
