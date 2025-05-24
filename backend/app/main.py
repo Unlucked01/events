@@ -24,7 +24,9 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Сервис организации мероприятий и встреч",
     description="API для управления мероприятиями, подписками и уведомлениями",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json"
 )
 
 # Add CORS middleware
