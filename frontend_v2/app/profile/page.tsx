@@ -297,7 +297,7 @@ export default function ProfilePage() {
               <Grid container spacing={4}>
                 <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <Avatar
-                    src={avatarPreview || (userData.profile_picture ? resolveImageUrl(userData.profile_picture) : undefined)}
+                    src={avatarPreview || resolveImageUrl(userData.profile_picture)}
                     alt={userData.full_name}
                     sx={{ width: 150, height: 150, mb: 2 }}
                   />
@@ -389,7 +389,7 @@ export default function ProfilePage() {
             <Grid container spacing={4}>
               <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <Avatar
-                  src={userData.profile_picture ? resolveImageUrl(userData.profile_picture) : undefined}
+                  src={resolveImageUrl(userData.profile_picture)}
                   alt={userData.full_name}
                   sx={{ width: 150, height: 150, mb: 2 }}
                 />
@@ -532,7 +532,7 @@ export default function ProfilePage() {
                           <Paper sx={{ p: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Avatar 
-                                src={follower.profile_picture ? resolveImageUrl(follower.profile_picture) : undefined} 
+                                src={resolveImageUrl(follower.profile_picture)}
                                 alt={follower.full_name || 'User'} 
                                 sx={{ mr: 2 }} 
                               />
@@ -563,7 +563,7 @@ export default function ProfilePage() {
                           <Paper sx={{ p: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Avatar 
-                                src={follow.profile_picture ? resolveImageUrl(follow.profile_picture) : undefined} 
+                                src={resolveImageUrl(follow.profile_picture)}
                                 alt={follow.full_name || 'User'} 
                                 sx={{ mr: 2 }} 
                               />

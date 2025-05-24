@@ -3,8 +3,11 @@
  * @param path The image path or URL to resolve
  * @returns A properly formatted URL for the image
  */
-export function resolveImageUrl(imagePath: string | null | undefined): string | undefined {
-  if (!imagePath) return undefined;
+export function resolveImageUrl(imagePath: string | null | undefined): string {
+  if (!imagePath) {
+    // Возвращаем серый placeholder в виде data URL
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+  }
   
   // Если это уже полный URL, возвращаем как есть
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {

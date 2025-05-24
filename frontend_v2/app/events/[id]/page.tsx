@@ -676,7 +676,7 @@ export default function EventPage() {
                     {participants.map((participant) => (
                       <Avatar 
                         key={participant.id} 
-                        src={participant.profile_picture ? resolveImageUrl(participant.profile_picture) : ''}
+                        src={resolveImageUrl(participant.profile_picture)}
                         alt={participant.full_name || 'Участник'}
                       />
                     ))}
@@ -687,7 +687,7 @@ export default function EventPage() {
                       <ListItem key={participant.id}>
                         <ListItemAvatar>
                           <Avatar 
-                            src={participant.profile_picture ? resolveImageUrl(participant.profile_picture) : ''}
+                            src={resolveImageUrl(participant.profile_picture)}
                             alt={participant.full_name || 'Участник'} 
                           />
                         </ListItemAvatar>
