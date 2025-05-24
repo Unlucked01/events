@@ -196,7 +196,7 @@ async def update_event(
     )
     
     # Get the updated event
-    return await EventService.get_event_by_id(db, event_id, current_user)
+    return EventService.get_event_by_id(db, event_id, current_user)
 
 @router.post("/{event_id}/images", response_model=EventDetail)
 async def upload_event_image(
