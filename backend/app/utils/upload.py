@@ -4,8 +4,8 @@ from fastapi import UploadFile
 from PIL import Image
 import shutil
 
-# Base upload path
-UPLOAD_DIR = os.path.join("app", "static", "uploads")
+# Base upload path - изменяем с "app/static" на просто "static"
+UPLOAD_DIR = "static/uploads"
 
 # Ensure directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -55,7 +55,7 @@ async def save_image(image_file: UploadFile, folder: str = "images", max_size: i
         
         # Save the original image
         image_path = await save_upload_file(image_file, folder)
-        full_path = os.path.join("app", "static", image_path)
+        full_path = os.path.join("static", image_path)
         
         # Validate the image can be opened
         try:
@@ -91,7 +91,7 @@ async def delete_file(file_path: str):
     """
     Delete a file from the filesystem.
     """
-    full_path = os.path.join("app", "static", file_path)
+    full_path = os.path.join("static", file_path)
     if os.path.exists(full_path):
         os.remove(full_path)
         return True

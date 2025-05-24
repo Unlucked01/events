@@ -14,8 +14,11 @@ export function resolveImageUrl(imagePath: string | null | undefined): string {
     return imagePath;
   }
   
-  // Для относительных путей, добавляем базовый URL и /static prefix
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org';
+  // Получаем базовый URL без /api в конце
+  let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org';
+  if (baseUrl.endsWith('/api')) {
+    baseUrl = baseUrl.slice(0, -4); // Убираем '/api' из конца
+  }
   
   // Убираем leading slash если есть
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;

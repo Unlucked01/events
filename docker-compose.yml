@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./backend:/app
-      - uploads_data:/app/app/static/uploads
+      - uploads_data:/app/static/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +34,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://unl-events.duckdns.org/api
+      - NEXT_PUBLIC_API_URL=https://unl-events.duckdns.org/api
     depends_on:
       - backend
     restart: always

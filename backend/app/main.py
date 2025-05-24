@@ -40,8 +40,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Ensure static directory exists
+static_dir = "static"
+uploads_dir = os.path.join(static_dir, "uploads")
+events_dir = os.path.join(uploads_dir, "events")
+
+for directory in [static_dir, uploads_dir, events_dir]:
+    os.makedirs(directory, exist_ok=True)
+
+# Mount static files with correct path
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Include routers
 app.include_router(router)
@@ -119,6 +127,25 @@ async def health_check(db: Session = Depends(get_db)):
     return {
         "status": "ok",
         "database": db_status
+    }
+
+# Test static files endpoint
+@app.get("/test-static", tags=["health"])
+async def test_static():
+    """Test static files configuration."""
+    import os
+    static_dir = "static"
+    uploads_dir = os.path.join(static_dir, "uploads")
+    events_dir = os.path.join(uploads_dir, "events")
+    
+    return {
+        "static_dir_exists": os.path.exists(static_dir),
+        "uploads_dir_exists": os.path.exists(uploads_dir),
+        "events_dir_exists": os.path.exists(events_dir),
+        "static_dir_path": os.path.abspath(static_dir),
+        "uploads_dir_path": os.path.abspath(uploads_dir),
+        "events_dir_path": os.path.abspath(events_dir),
+        "events_files": os.listdir(events_dir) if os.path.exists(events_dir) else []
     }
 
 # Error handlers
