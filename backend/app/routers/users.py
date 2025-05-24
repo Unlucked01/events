@@ -9,7 +9,7 @@ from ..schemas import UserDisplay, UserDetail, UserUpdate, SubscriptionDisplay
 from ..models import User
 
 router = APIRouter(
-    prefix="/api/users",
+    prefix="/users",
     tags=["users"],
     responses={401: {"description": "Unauthorized"}},
 )

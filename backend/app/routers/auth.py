@@ -7,7 +7,7 @@ from ..services import AuthService
 from ..schemas import UserCreate, UserDisplay, Token
 
 router = APIRouter(
-    prefix="/api/auth",
+    prefix="/auth",
     tags=["auth"],
     responses={401: {"description": "Unauthorized"}},
 )

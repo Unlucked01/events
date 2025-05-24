@@ -9,7 +9,7 @@ from ..schemas import ParticipantDisplay
 from ..models import User
 
 router = APIRouter(
-    prefix="/api/participations",
+    prefix="/participations",
     tags=["participations"],
     responses={401: {"description": "Unauthorized"}},
 )
