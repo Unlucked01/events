@@ -41,7 +41,7 @@ app.add_middleware(
 )
 
 # Ensure static directory exists
-static_dir = "static"
+static_dir = "/app/static"  # Используем абсолютный путь
 uploads_dir = os.path.join(static_dir, "uploads")
 events_dir = os.path.join(uploads_dir, "events")
 
@@ -134,7 +134,7 @@ async def health_check(db: Session = Depends(get_db)):
 async def test_static():
     """Test static files configuration."""
     import os
-    static_dir = "static"
+    static_dir = "/app/static"  # Используем абсолютный путь
     uploads_dir = os.path.join(static_dir, "uploads")
     events_dir = os.path.join(uploads_dir, "events")
     
@@ -145,7 +145,8 @@ async def test_static():
         "static_dir_path": os.path.abspath(static_dir),
         "uploads_dir_path": os.path.abspath(uploads_dir),
         "events_dir_path": os.path.abspath(events_dir),
-        "events_files": os.listdir(events_dir) if os.path.exists(events_dir) else []
+        "events_files": os.listdir(events_dir) if os.path.exists(events_dir) else [],
+        "working_directory": os.getcwd()
     }
 
 # Debug endpoint for event data
@@ -165,10 +166,10 @@ async def debug_event(event_id: int, db: Session = Depends(get_db)):
         "images_count": len(event.images),
         "working_directory": os.getcwd(),
         "static_files_check": {
-            "static_exists": os.path.exists("static"),
-            "uploads_exists": os.path.exists("static/uploads"),
-            "events_exists": os.path.exists("static/uploads/events"),
-            "event_files": os.listdir("static/uploads/events") if os.path.exists("static/uploads/events") else []
+            "static_exists": os.path.exists("/app/static"),
+            "uploads_exists": os.path.exists("/app/static/uploads"),
+            "events_exists": os.path.exists("/app/static/uploads/events"),
+            "event_files": os.listdir("/app/static/uploads/events") if os.path.exists("/app/static/uploads/events") else []
         }
     }
 
@@ -176,7 +177,7 @@ async def debug_event(event_id: int, db: Session = Depends(get_db)):
 @app.get("/debug/file/{file_path:path}", tags=["debug"])
 async def debug_file(file_path: str):
     """Debug endpoint to check if a specific file exists."""
-    full_path = os.path.join("static", file_path)
+    full_path = os.path.join("/app/static", file_path)  # Используем абсолютный путь
     return {
         "file_path": file_path,
         "full_path": full_path,
