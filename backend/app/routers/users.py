@@ -24,6 +24,16 @@ async def get_current_user_profile(
     print('User from DB:', user.__dict__)
     return user
 
+@router.get("/search", response_model=List[UserDisplay])
+async def search_users(
+    query: str = Query(..., min_length=3),
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """Search users by username, phone, or full name."""
+    return UserService.search_users(db, query, skip, limit)
+
 @router.get("/{user_id}", response_model=UserDetail)
 async def get_user_profile(
     user_id: int,
@@ -57,16 +67,6 @@ async def update_profile_picture(
 ):
     """Update current user profile picture."""
     return await UserService.update_profile_picture(db, current_user.id, profile_picture, current_user)
-
-@router.get("/search", response_model=List[UserDisplay])
-async def search_users(
-    query: str = Query(..., min_length=3),
-    skip: int = 0,
-    limit: int = 10,
-    db: Session = Depends(get_db)
-):
-    """Search users by username, phone, or full name."""
-    return UserService.search_users(db, query, skip, limit)
 
 # Subscription routes
 @router.post("/{user_id}/follow", response_model=SubscriptionDisplay)
