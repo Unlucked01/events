@@ -120,7 +120,6 @@ export default function Navigation({ children }: NavigationProps) {
               width: 80, 
               height: 80, 
               mb: 2,
-              bgcolor: theme.palette.primary.main,
             }}
             src={currentUser.profile_picture}
             name={currentUser.full_name}
