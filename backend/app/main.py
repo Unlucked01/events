@@ -148,6 +148,45 @@ async def test_static():
         "events_files": os.listdir(events_dir) if os.path.exists(events_dir) else []
     }
 
+# Debug endpoint for event data
+@app.get("/debug/event/{event_id}", tags=["debug"])
+async def debug_event(event_id: int, db: Session = Depends(get_db)):
+    """Debug endpoint to check event data structure."""
+    from .models import Event
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        return {"error": "Event not found"}
+    
+    return {
+        "event_id": event.id,
+        "title": event.title,
+        "raw_images": [{"id": img.id, "path": img.image_path} for img in event.images],
+        "to_dict_images": event.to_dict()["images"],
+        "images_count": len(event.images),
+        "working_directory": os.getcwd(),
+        "static_files_check": {
+            "static_exists": os.path.exists("static"),
+            "uploads_exists": os.path.exists("static/uploads"),
+            "events_exists": os.path.exists("static/uploads/events"),
+            "event_files": os.listdir("static/uploads/events") if os.path.exists("static/uploads/events") else []
+        }
+    }
+
+# Check specific file endpoint
+@app.get("/debug/file/{file_path:path}", tags=["debug"])
+async def debug_file(file_path: str):
+    """Debug endpoint to check if a specific file exists."""
+    full_path = os.path.join("static", file_path)
+    return {
+        "file_path": file_path,
+        "full_path": full_path,
+        "absolute_path": os.path.abspath(full_path),
+        "exists": os.path.exists(full_path),
+        "is_file": os.path.isfile(full_path) if os.path.exists(full_path) else False,
+        "size": os.path.getsize(full_path) if os.path.exists(full_path) else 0,
+        "working_directory": os.getcwd()
+    }
+
 # Error handlers
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

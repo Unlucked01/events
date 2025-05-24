@@ -38,6 +38,7 @@ import Navigation from '@/components/Navigation';
 import Link from 'next/link';
 import { eventsService } from '@/lib/api';
 import { Event, EventListParams } from '@/lib/api/events';
+import { resolveImageUrl } from '@/lib/utils/image';
 
 export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -223,7 +224,7 @@ export default function EventsPage() {
                     component="img"
                     height="140"
                     image={event.images && event.images.length > 0 ? 
-                      (event.images[0].startsWith('http') ? event.images[0] : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/${event.images[0]}`) 
+                      resolveImageUrl(event.images[0])
                       : "/event-placeholder.jpg"}
                     alt={event.title}
                   />

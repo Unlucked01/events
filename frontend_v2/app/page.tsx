@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { eventsService } from '@/lib/api';
 import { Event } from '@/lib/api/events';
+import { resolveImageUrl } from '@/lib/utils/image';
 
 export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
@@ -78,7 +79,7 @@ export default function Home() {
                   <CardMedia
                     component="img"
                     height="140"
-                    image={event.images && event.images.length > 0 ? event.images[0] : "/event-placeholder.jpg"}
+                    image={event.images && event.images.length > 0 ? resolveImageUrl(event.images[0]) : "/event-placeholder.jpg"}
                     alt={event.title}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>

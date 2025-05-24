@@ -16,6 +16,7 @@ export function resolveImageUrl(imagePath: string | null | undefined): string {
   
   // Получаем базовый URL без /api в конце
   let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org';
+  
   if (baseUrl.endsWith('/api')) {
     baseUrl = baseUrl.slice(0, -4); // Убираем '/api' из конца
   }
@@ -24,7 +25,9 @@ export function resolveImageUrl(imagePath: string | null | undefined): string {
   const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
   
   // Формируем правильный URL: baseUrl/static/uploads/...
-  return `${baseUrl}/static/${cleanPath}`;
+  const finalUrl = `${baseUrl}/static/${cleanPath}`;
+  
+  return finalUrl;
 }
 
 // Функция для сжатия изображения
