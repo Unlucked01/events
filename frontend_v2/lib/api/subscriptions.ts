@@ -44,7 +44,19 @@ const subscriptionsService = {
 
   // Поиск пользователей
   searchUsers: async (params: UserSearchParams = {}): Promise<PaginatedResponse<User> | User[]> => {
-    const response = await apiClient.get<PaginatedResponse<User> | User[]>('/api/users/search', { params });
+    // Преобразуем параметры для соответствия API
+    const { search, page, limit, skip, ...rest } = params;
+    const apiParams: any = { ...rest };
+
+    if (search) apiParams.query = search;
+    if (typeof limit === 'number') apiParams.limit = limit;
+    if (typeof skip === 'number') {
+      apiParams.skip = skip;
+    } else if (typeof page === 'number' && typeof limit === 'number') {
+      apiParams.skip = (page - 1) * limit;
+    }
+
+    const response = await apiClient.get<PaginatedResponse<User> | User[]>('/api/users/search', { params: apiParams });
     return response.data;
   }
 };
