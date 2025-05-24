@@ -29,7 +29,7 @@ router = APIRouter(
 import os
 from dotenv import load_dotenv
 load_dotenv()
-BASE_URL = os.getenv("BASE_URL", "http://localhost:3000")
+BASE_URL = os.getenv("BASE_URL", "https://unl-events.duckdns.org")
 
 # Helper function to parse JSON string from form data
 def parse_json_field(field: str, default=None):

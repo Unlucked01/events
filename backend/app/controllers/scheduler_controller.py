@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get base URL from environment variables or use default
-BASE_URL = os.getenv("BASE_URL", "http://localhost:3000")
+BASE_URL = os.getenv("BASE_URL", "https://unl-events.duckdns.org")
 
 class SchedulerController:
     def __init__(self):

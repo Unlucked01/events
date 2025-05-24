@@ -204,7 +204,7 @@ const eventsService = {
     
     // Сжимаем и добавляем изображения
     if (data.images?.length) {
-      const compressedImages = await compressImages(data.images, 1920, 1080, 0.7);
+      const compressedImages = await compressImages(data.images, 1024, 768, 0.5);
       compressedImages.forEach((image) => {
         formData.append('images', image);
       });
@@ -241,7 +241,7 @@ const eventsService = {
     
     // Сжимаем и добавляем изображения
     if (data.images?.length) {
-      const compressedImages = await compressImages(data.images, 1920, 1080, 0.7);
+      const compressedImages = await compressImages(data.images, 1024, 768, 0.5);
       compressedImages.forEach((image) => {
         formData.append('images', image);
       });

@@ -20,7 +20,7 @@ export function resolveImageUrl(imagePath: string | null | undefined): string {
 }
 
 // Функция для сжатия изображения
-export function compressImage(file: File, maxWidth = 1920, maxHeight = 1080, quality = 0.8): Promise<File> {
+export function compressImage(file: File, maxWidth = 1024, maxHeight = 768, quality = 0.5): Promise<File> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
@@ -30,14 +30,29 @@ export function compressImage(file: File, maxWidth = 1920, maxHeight = 1080, qua
       // Вычисляем новые размеры с сохранением пропорций
       let { width, height } = img;
       
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
+      // Для очень больших изображений используем более агрессивное сжатие
+      let finalMaxWidth = maxWidth;
+      let finalMaxHeight = maxHeight;
+      let finalQuality = quality;
+      
+      if (file.size > 5 * 1024 * 1024) { // > 5MB
+        finalMaxWidth = 800;
+        finalMaxHeight = 600;
+        finalQuality = 0.3;
+      } else if (file.size > 2 * 1024 * 1024) { // > 2MB
+        finalMaxWidth = 900;
+        finalMaxHeight = 675;
+        finalQuality = 0.4;
       }
       
-      if (height > maxHeight) {
-        width = (width * maxHeight) / height;
-        height = maxHeight;
+      if (width > finalMaxWidth) {
+        height = (height * finalMaxWidth) / width;
+        width = finalMaxWidth;
+      }
+      
+      if (height > finalMaxHeight) {
+        width = (width * finalMaxHeight) / height;
+        height = finalMaxHeight;
       }
       
       canvas.width = width;
@@ -54,6 +69,15 @@ export function compressImage(file: File, maxWidth = 1920, maxHeight = 1080, qua
               type: file.type,
               lastModified: Date.now(),
             });
+            
+            // Если файл все еще слишком большой (> 1MB), попробуем еще больше сжать
+            if (compressedFile.size > 1024 * 1024 && finalQuality > 0.1) {
+              // Рекурсивно сжимаем с еще более низким качеством
+              compressImage(compressedFile, finalMaxWidth * 0.8, finalMaxHeight * 0.8, finalQuality * 0.5)
+                .then(resolve);
+              return;
+            }
+            
             resolve(compressedFile);
           } else {
             // Если сжатие не удалось, возвращаем оригинальный файл
@@ -61,7 +85,7 @@ export function compressImage(file: File, maxWidth = 1920, maxHeight = 1080, qua
           }
         },
         file.type,
-        quality
+        finalQuality
       );
     };
     
@@ -75,12 +99,14 @@ export function compressImage(file: File, maxWidth = 1920, maxHeight = 1080, qua
 }
 
 // Функция для сжатия массива изображений
-export async function compressImages(files: File[], maxWidth = 1920, maxHeight = 1080, quality = 0.8): Promise<File[]> {
+export async function compressImages(files: File[], maxWidth = 1024, maxHeight = 768, quality = 0.5): Promise<File[]> {
   const compressedFiles: File[] = [];
   
   for (const file of files) {
     if (file.type.startsWith('image/')) {
+      console.log(`Исходный размер ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
       const compressedFile = await compressImage(file, maxWidth, maxHeight, quality);
+      console.log(`Сжатый размер ${file.name}: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
       compressedFiles.push(compressedFile);
     } else {
       // Если это не изображение, добавляем как есть

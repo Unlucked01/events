@@ -1,12 +1,14 @@
 import os
 import asyncio
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import logging
 from dotenv import load_dotenv
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from .routers import router
 from .config.database import Base, engine, get_db
@@ -43,6 +45,29 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
 app.include_router(router)
+
+# Add middleware to limit request size
+class LimitUploadSizeMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, max_upload_size: int):
+        super().__init__(app)
+        self.max_upload_size = max_upload_size
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "POST" or request.method == "PUT":
+            content_length = request.headers.get("content-length")
+            if content_length:
+                content_length = int(content_length)
+                if content_length > self.max_upload_size:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Request entity too large. Maximum size is {self.max_upload_size} bytes"
+                    )
+        
+        response = await call_next(request)
+        return response
+
+# Add upload size limit middleware (50MB)
+app.add_middleware(LimitUploadSizeMiddleware, max_upload_size=50 * 1024 * 1024)
 
 # Event handlers
 @app.on_event("startup")

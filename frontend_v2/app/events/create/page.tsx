@@ -96,6 +96,16 @@ export default function CreateEvent() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
+      
+      // Проверяем размер каждого файла (макс 10MB)
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+      const invalidFiles = selectedFiles.filter(file => file.size > maxFileSize);
+      
+      if (invalidFiles.length > 0) {
+        alert(`Следующие файлы слишком большие (максимум 10MB): ${invalidFiles.map(f => f.name).join(', ')}`);
+        return;
+      }
+      
       const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
       
       setImages(prev => [...prev, ...selectedFiles]);
