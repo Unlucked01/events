@@ -20,7 +20,7 @@ from ..models import User
 from ..controllers.telegram_controller import TelegramController
 
 router = APIRouter(
-    prefix="/events",
+    prefix="/api/events",
     tags=["events"],
     responses={401: {"description": "Unauthorized"}},
 )

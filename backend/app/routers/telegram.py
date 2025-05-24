@@ -7,7 +7,7 @@ from app.models import User
 from app.utils.security import get_current_active_user
 from app.controllers.telegram_controller import bot
 
-router = APIRouter(prefix="/telegram", tags=["telegram"])
+router = APIRouter(prefix="/api/telegram", tags=["telegram"])
 
 @router.post("/link-token")
 def create_telegram_link_token(
