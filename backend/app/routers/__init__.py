@@ -7,7 +7,7 @@ from .invitations import router as invitations_router
 from .participations import router as participations_router
 from .telegram import router as telegram_router
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 
 router.include_router(auth_router)
 router.include_router(users_router)
