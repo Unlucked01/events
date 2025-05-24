@@ -20,6 +20,10 @@ import {
   Stack,
   CircularProgress,
   Alert,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -31,6 +35,8 @@ import {
   People,
   Person,
   Phone,
+  PersonAdd,
+  PersonRemove,
 } from '@mui/icons-material';
 import Navigation from '@/components/Navigation';
 import Link from 'next/link';
@@ -40,6 +46,7 @@ import { User } from '@/lib/api/auth';
 import { Event } from '@/lib/api/events';
 import { resolveImageUrl } from '@/lib/utils/image';
 import { getTelegramLinkToken } from '@/lib/api/telegram';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -296,9 +303,10 @@ export default function ProfilePage() {
             <Box component="form" onSubmit={handleSubmit}>
               <Grid container spacing={4}>
                 <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Avatar
-                    src={avatarPreview || resolveImageUrl(userData.profile_picture)}
-                    alt={userData.full_name}
+                  <UserAvatar
+                    src={avatarPreview || userData.profile_picture}
+                    name={userData.full_name}
+                    userId={userData.id}
                     sx={{ width: 150, height: 150, mb: 2 }}
                   />
                   <Button
@@ -388,9 +396,10 @@ export default function ProfilePage() {
           ) : (
             <Grid container spacing={4}>
               <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Avatar
-                  src={resolveImageUrl(userData.profile_picture)}
-                  alt={userData.full_name}
+                <UserAvatar
+                  src={userData.profile_picture}
+                  name={userData.full_name}
+                  userId={userData.id}
                   sx={{ width: 150, height: 150, mb: 2 }}
                 />
                 <Typography variant="h6" gutterBottom>
@@ -531,9 +540,10 @@ export default function ProfilePage() {
                         <Grid item xs={12} sm={6} md={4} key={follower.id || Math.random()}>
                           <Paper sx={{ p: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Avatar 
-                                src={resolveImageUrl(follower.profile_picture)}
-                                alt={follower.full_name || 'User'} 
+                              <UserAvatar 
+                                src={follower.profile_picture}
+                                name={follower.full_name}
+                                userId={follower.id}
                                 sx={{ mr: 2 }} 
                               />
                               <Box>
@@ -562,9 +572,10 @@ export default function ProfilePage() {
                         <Grid item xs={12} sm={6} md={4} key={follow.id || Math.random()}>
                           <Paper sx={{ p: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Avatar 
-                                src={resolveImageUrl(follow.profile_picture)}
-                                alt={follow.full_name || 'User'} 
+                              <UserAvatar 
+                                src={follow.profile_picture}
+                                name={follow.full_name}
+                                userId={follow.id}
                                 sx={{ mr: 2 }} 
                               />
                               <Box>

@@ -27,6 +27,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
+  Fab,
 } from '@mui/material';
 import {
   CalendarMonth,
@@ -49,6 +51,7 @@ import { Comment, CommentCreateData } from '@/lib/api/comments';
 import { User } from '@/lib/api/auth';
 import { Review, ReviewCreateData } from '@/lib/api/reviews';
 import { resolveImageUrl } from '@/lib/utils/image';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function EventPage() {
   const params = useParams();
@@ -537,7 +540,11 @@ export default function EventPage() {
                         <React.Fragment key={comment.id}>
                           <ListItem alignItems="flex-start">
                             <ListItemAvatar>
-                              <Avatar src={resolveImageUrl(comment.user?.profile_picture)} alt={comment.user?.full_name || 'User'} />
+                              <UserAvatar 
+                                src={comment.user?.profile_picture} 
+                                name={comment.user?.full_name}
+                                userId={comment.user?.id}
+                              />
                             </ListItemAvatar>
                             <ListItemText
                               primary={
@@ -621,9 +628,10 @@ export default function EventPage() {
                               }
                             >
                               <ListItemAvatar>
-                                <Avatar 
-                                  src={resolveImageUrl(review.user?.profile_picture)} 
-                                  alt={review.user?.full_name || 'User'} 
+                                <UserAvatar 
+                                  src={review.user?.profile_picture}
+                                  name={review.user?.full_name}
+                                  userId={review.user?.id}
                                 />
                               </ListItemAvatar>
                               <ListItemText
@@ -674,10 +682,11 @@ export default function EventPage() {
                 <>
                   <AvatarGroup max={10} sx={{ mb: 2, justifyContent: 'flex-start' }}>
                     {participants.map((participant) => (
-                      <Avatar 
+                      <UserAvatar 
                         key={participant.id} 
-                        src={resolveImageUrl(participant.profile_picture)}
-                        alt={participant.full_name || 'Участник'}
+                        src={participant.profile_picture}
+                        name={participant.full_name}
+                        userId={participant.id}
                       />
                     ))}
                   </AvatarGroup>
@@ -686,9 +695,10 @@ export default function EventPage() {
                     {participants.map((participant) => (
                       <ListItem key={participant.id}>
                         <ListItemAvatar>
-                          <Avatar 
-                            src={resolveImageUrl(participant.profile_picture)}
-                            alt={participant.full_name || 'Участник'} 
+                          <UserAvatar 
+                            src={participant.profile_picture}
+                            name={participant.full_name}
+                            userId={participant.id}
                           />
                         </ListItemAvatar>
                         <ListItemText 
@@ -716,9 +726,10 @@ export default function EventPage() {
                   {event.invitees?.map((invitee) => (
                     <ListItem key={invitee?.id || Math.random()}>
                       <ListItemAvatar>
-                        <Avatar 
-                          src={resolveImageUrl(invitee?.profile_picture)}
-                          alt={invitee?.full_name || 'Приглашенный'}
+                        <UserAvatar 
+                          src={invitee?.profile_picture}
+                          name={invitee?.full_name}
+                          userId={invitee?.id}
                         />
                       </ListItemAvatar>
                       <ListItemText 

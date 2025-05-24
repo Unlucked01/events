@@ -14,9 +14,14 @@ export function resolveImageUrl(imagePath: string | null | undefined): string {
     return imagePath;
   }
   
-  // Если это относительный путь, добавляем базовый URL
+  // Для относительных путей, добавляем базовый URL и /static prefix
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org';
-  return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+  
+  // Убираем leading slash если есть
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  // Формируем правильный URL: baseUrl/static/uploads/...
+  return `${baseUrl}/static/${cleanPath}`;
 }
 
 // Функция для сжатия изображения

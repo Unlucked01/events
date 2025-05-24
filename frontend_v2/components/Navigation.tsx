@@ -38,6 +38,7 @@ import {
 import Link from 'next/link';
 import { authService } from '@/lib/api';
 import { User } from '@/lib/api/auth';
+import UserAvatar from './UserAvatar';
 
 const drawerWidth = 240;
 
@@ -114,17 +115,17 @@ export default function Navigation({ children }: NavigationProps) {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {isAuthenticated && currentUser ? (
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Avatar
+          <UserAvatar
             sx={{ 
               width: 80, 
               height: 80, 
               mb: 2,
               bgcolor: theme.palette.primary.main,
             }}
-            src={currentUser.avatar || undefined}
-          >
-            {currentUser.full_name ? currentUser.full_name.charAt(0) : ''}
-          </Avatar>
+            src={currentUser.profile_picture}
+            name={currentUser.full_name}
+            userId={currentUser.id}
+          />
           <Typography variant="subtitle1" noWrap component="div" fontWeight="bold">
             {currentUser.full_name || currentUser.username}
           </Typography>
@@ -275,12 +276,12 @@ export default function Navigation({ children }: NavigationProps) {
                 onClick={handleProfileMenuOpen}
                 color="inherit"
               >
-                <Avatar 
+                <UserAvatar 
                   sx={{ width: 32, height: 32 }}
-                  src={currentUser?.avatar || undefined}
-                >
-                  {currentUser?.full_name ? currentUser.full_name.charAt(0) : ''}
-                </Avatar>
+                  src={currentUser?.profile_picture}
+                  name={currentUser?.full_name}
+                  userId={currentUser?.id}
+                />
               </IconButton>
               
               <Menu

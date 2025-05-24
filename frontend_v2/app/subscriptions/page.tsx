@@ -19,6 +19,11 @@ import {
   ListItemText,
   IconButton,
   CircularProgress,
+  Chip,
+  Tooltip,
+  Alert,
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -30,6 +35,7 @@ import Navigation from '@/components/Navigation';
 import { subscriptionsService, authService } from '@/lib/api';
 import { User } from '@/lib/api/auth';
 import { resolveImageUrl } from '@/lib/utils/image';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function SubscriptionsPage() {
   const [tabValue, setTabValue] = useState(0);
@@ -185,7 +191,11 @@ export default function SubscriptionsPage() {
             sx={{ py: 1.5 }}
           >
             <ListItemAvatar>
-              <Avatar src={resolveImageUrl(user.profile_picture)} alt={user.full_name || ''} />
+              <UserAvatar 
+                src={user.profile_picture} 
+                name={user.full_name}
+                userId={user.id}
+              />
             </ListItemAvatar>
             <ListItemText 
               primary={user.full_name || 'Пользователь'}
