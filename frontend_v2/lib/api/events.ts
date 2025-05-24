@@ -1,5 +1,6 @@
 import apiClient from './client';
 import { User } from './auth';
+import { compressImages } from '../utils/image';
 
 export interface Event {
   id: number;
@@ -201,9 +202,10 @@ const eventsService = {
       });
     }
     
-    // Добавляем изображения
+    // Сжимаем и добавляем изображения
     if (data.images?.length) {
-      data.images.forEach((image) => {
+      const compressedImages = await compressImages(data.images, 1920, 1080, 0.7);
+      compressedImages.forEach((image) => {
         formData.append('images', image);
       });
     }
@@ -237,9 +239,10 @@ const eventsService = {
       formData.append('invited_users', JSON.stringify(data.invitees));
     }
     
-    // Добавляем изображения
+    // Сжимаем и добавляем изображения
     if (data.images?.length) {
-      data.images.forEach((image) => {
+      const compressedImages = await compressImages(data.images, 1920, 1080, 0.7);
+      compressedImages.forEach((image) => {
         formData.append('images', image);
       });
     }

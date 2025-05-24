@@ -10,4 +10,4 @@ echo "✅ База данных готова, запускаем инициал�
 PYTHONPATH=/app python -m app.utils.init_db
 
 echo "🚀 Запуск FastAPI..."
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --limit-max-request-size 20971520
+exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
