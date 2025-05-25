@@ -271,7 +271,7 @@ const eventsService = {
   // Поиск событий через специальный endpoint
   searchEvents: async (query: string, params: Omit<EventListParams, 'search'> = {}): Promise<PaginatedResponse<Event>> => {
     try {
-      console.log('Searching events with query:', query, 'and params:', params);
+      console.log('🔍 USING SEARCH ENDPOINT - Searching events with query:', query, 'and params:', params);
       const searchParams = {
         query,
         upcoming_only: false,
@@ -280,8 +280,9 @@ const eventsService = {
         ...params
       };
       
+      console.log('🔍 SEARCH REQUEST to /api/events/search with params:', searchParams);
       const response = await apiClient.get<Event[]>('/api/events/search', { params: searchParams });
-      console.log('Search events API response:', response);
+      console.log('🔍 SEARCH RESPONSE from /api/events/search:', response);
       
       // Поскольку /api/events/search возвращает массив, а не PaginatedResponse,
       // оборачиваем результат в формат PaginatedResponse
@@ -297,7 +298,7 @@ const eventsService = {
         return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
       }
     } catch (error) {
-      console.error('Search events error:', error);
+      console.error('🔍 SEARCH ERROR:', error);
       return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
     }
   }

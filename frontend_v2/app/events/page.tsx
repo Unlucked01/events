@@ -64,7 +64,7 @@ export default function EventsPage() {
         
         let response;
         
-        // Если есть поисковый запрос, используем специальный endpoint для поиска
+        // Если есть поисковый запрос, всегда используем специальный endpoint для поиска
         if (params.search && params.search.trim().length >= 3) {
           const searchParams = { ...apiParams };
           delete searchParams.search; // Удаляем search из params, так как он передается отдельно
@@ -98,6 +98,8 @@ export default function EventsPage() {
 
   const handleSearch = () => {
     if (searchQuery.trim().length >= 3) {
+      // При поиске переключаемся на вкладку "Все мероприятия"
+      setTabValue(0);
       setParams(prev => ({ ...prev, search: searchQuery.trim() }));
     } else if (searchQuery.trim().length === 0) {
       // Если поисковый запрос пустой, очищаем поиск
@@ -149,6 +151,15 @@ export default function EventsPage() {
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    // При переключении вкладок очищаем поиск, так как поиск работает только для "Все мероприятия"
+    if (newValue === 1 && params.search) {
+      setSearchQuery('');
+      setParams(prev => {
+        const newParams = { ...prev };
+        delete newParams.search;
+        return newParams;
+      });
+    }
   };
 
   return (
