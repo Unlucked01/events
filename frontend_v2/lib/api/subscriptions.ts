@@ -39,7 +39,7 @@ const subscriptionsService = {
 
   // Отписка от пользователя
   unfollow: async (userId: number): Promise<void> => {
-    await apiClient.delete(`/api/users/${userId}/follow`);
+    await apiClient.delete(`/api/users/${userId}/unfollow`);
   },
 
   // Поиск пользователей
