@@ -81,10 +81,15 @@ const eventsService = {
       console.log('Fetching all events with params:', params);
       const response = await apiClient.get<any>('/api/events', { params });
       console.log('Events API response:', response);
-      
-      // Проверяем структуру ответа
+      console.log(response)
       if (response.data) {
-          return response.data;
+        return {
+          items: response.data,
+          total: response.data.length,
+          page: Math.floor((params.skip || 0) / (params.limit || 10)) + 1,
+          limit: params.limit || 10,
+          pages: Math.ceil(response.data.length / (params.limit || 10))
+        };
       } else {
         return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
       }
@@ -114,7 +119,13 @@ const eventsService = {
             pages: 1
           };
         } else if (response.data.items) {
-          return response.data;
+          return {
+            items: response.data,
+            total: response.data.length,
+            page: Math.floor((params.skip || 0) / (params.limit || 10)) + 1,
+            limit: params.limit || 10,
+            pages: Math.ceil(response.data.length / (params.limit || 10))
+          };
         } else {
           console.warn('Unexpected response format from getFeedEvents API call:', response.data);
           return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
