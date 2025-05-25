@@ -84,21 +84,7 @@ const eventsService = {
       
       // Проверяем структуру ответа
       if (response.data) {
-        // Проверим, не является ли ответ прямым массивом вместо объекта PaginatedResponse
-        if (Array.isArray(response.data)) {
-          return {
-            items: response.data,
-            total: response.data.length,
-            page: 1,
-            limit: response.data.length,
-            pages: 1
-          };
-        } else if (response.data.items) {
           return response.data;
-        } else {
-          console.warn('Unexpected response format from getEvents API call:', response.data);
-          return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
-        }
       } else {
         return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
       }
@@ -280,6 +266,40 @@ const eventsService = {
   getEventParticipants: async (eventId: number): Promise<ParticipantResponse[]> => {
     const response = await apiClient.get<ParticipantResponse[]>(`/api/events/${eventId}/participants`);
     return response.data;
+  },
+
+  // Поиск событий через специальный endpoint
+  searchEvents: async (query: string, params: Omit<EventListParams, 'search'> = {}): Promise<PaginatedResponse<Event>> => {
+    try {
+      console.log('Searching events with query:', query, 'and params:', params);
+      const searchParams = {
+        query,
+        upcoming_only: false,
+        skip: params.skip || 0,
+        limit: params.limit || 10,
+        ...params
+      };
+      
+      const response = await apiClient.get<Event[]>('/api/events/search', { params: searchParams });
+      console.log('Search events API response:', response);
+      
+      // Поскольку /api/events/search возвращает массив, а не PaginatedResponse,
+      // оборачиваем результат в формат PaginatedResponse
+      if (Array.isArray(response.data)) {
+        return {
+          items: response.data,
+          total: response.data.length,
+          page: Math.floor((params.skip || 0) / (params.limit || 10)) + 1,
+          limit: params.limit || 10,
+          pages: Math.ceil(response.data.length / (params.limit || 10))
+        };
+      } else {
+        return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
+      }
+    } catch (error) {
+      console.error('Search events error:', error);
+      return { items: [], total: 0, page: 1, limit: 10, pages: 0 };
+    }
   }
 };
 

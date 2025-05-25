@@ -63,11 +63,24 @@ export default function EventsPage() {
         };
         
         let response;
-        if (tabValue === 0) {
-          response = await eventsService.getEvents(apiParams);
+        
+        // Если есть поисковый запрос, используем специальный endpoint для поиска
+        if (params.search && params.search.trim().length >= 3) {
+          const searchParams = { ...apiParams };
+          delete searchParams.search; // Удаляем search из params, так как он передается отдельно
+          response = await eventsService.searchEvents(params.search, searchParams);
+        } else if (tabValue === 0) {
+          // Для обычного списка событий убираем search параметр если он есть
+          const regularParams = { ...apiParams };
+          delete regularParams.search;
+          response = await eventsService.getEvents(regularParams);
         } else {
-          response = await eventsService.getFeedEvents(apiParams);
+          // Для ленты также убираем search параметр
+          const feedParams = { ...apiParams };
+          delete feedParams.search;
+          response = await eventsService.getFeedEvents(feedParams);
         }
+        
         setEvents(response.items);
       } catch (error) {
         console.error('Ошибка при загрузке мероприятий:', error);
@@ -84,7 +97,17 @@ export default function EventsPage() {
   };
 
   const handleSearch = () => {
-    setParams(prev => ({ ...prev, search: searchQuery }));
+    if (searchQuery.trim().length >= 3) {
+      setParams(prev => ({ ...prev, search: searchQuery.trim() }));
+    } else if (searchQuery.trim().length === 0) {
+      // Если поисковый запрос пустой, очищаем поиск
+      setParams(prev => {
+        const newParams = { ...prev };
+        delete newParams.search;
+        return newParams;
+      });
+    }
+    // Если запрос меньше 3 символов, ничего не делаем (можно добавить уведомление)
   };
 
   const handleClearSearch = () => {
@@ -155,6 +178,8 @@ export default function EventsPage() {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               fullWidth
               size="small"
+              helperText={searchQuery.length > 0 && searchQuery.length < 3 ? "Минимум 3 символа для поиска" : ""}
+              error={searchQuery.length > 0 && searchQuery.length < 3}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -174,6 +199,7 @@ export default function EventsPage() {
               onClick={handleSearch}
               variant="contained"
               sx={{ minWidth: 'auto' }}
+              disabled={searchQuery.length > 0 && searchQuery.length < 3}
             >
               Найти
             </Button>
