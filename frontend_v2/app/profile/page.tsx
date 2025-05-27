@@ -45,7 +45,7 @@ import { profileService, authService, eventsService, subscriptionsService } from
 import { User } from '@/lib/api/auth';
 import { Event } from '@/lib/api/events';
 import { resolveImageUrl } from '@/lib/utils/image';
-import { getTelegramLinkToken } from '@/lib/api/telegram';
+import telegramService from '@/lib/api/telegram';
 import UserAvatar from '@/components/UserAvatar';
 
 export default function ProfilePage() {
@@ -241,7 +241,7 @@ export default function ProfilePage() {
   const handleTelegramLink = async () => {
     setTelegramLinkLoading(true);
     try {
-      const link = await getTelegramLinkToken();
+      const link = await telegramService.getTelegramLinkToken();
       setTelegramLinkUrl(link);
       window.open(link, '_blank');
       // Через 10 секунд обновить профиль

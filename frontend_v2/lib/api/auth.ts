@@ -11,7 +11,6 @@ export interface RegisterData {
   password: string;
   full_name: string;
   phone: string;
-  telegram_username?: string;
 }
 
 export interface User {
@@ -19,10 +18,11 @@ export interface User {
   username: string;
   full_name: string;
   phone: string;
-  avatar?: string;
   profile_picture?: string;
   telegram_chat_id?: string;
   created_at: string;
+  updated_at: string;
+  is_active: boolean;
 }
 
 export interface AuthResponse {
@@ -31,37 +31,40 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface LoginData {
+  username: string;
+  password: string;
+}
+
 // Сервис для работы с авторизацией
 const authService = {
   // Вход в систему
-  login: async (credentials: LoginCredentials) => {
+  login: async (data: LoginData): Promise<AuthResponse> => {
     try {
-      const form = new URLSearchParams();
-      form.append("username", credentials.username);
-      form.append("password", credentials.password);
-      
-      // FastAPI OAuth2 ожидает данные в формате форм
-      const response = await apiClient.post('/api/auth/login', form, {
+      // Создаем FormData для отправки данных в формате form-data
+      const form = new FormData();
+      form.append('username', data.username);
+      form.append('password', data.password);
+
+      const response = await apiClient.post('/auth/login', form, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'multipart/form-data',
         },
       });
-      
-      console.log('Login response:', response.data);
-      
+
       // Сохраняем токен в localStorage
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
         
-        // Получаем информацию о пользователе отдельным запросом
-        const userResponse = await apiClient.get<User>('/api/users/me');
+        // Получаем информацию о пользователе
+        const userResponse = await apiClient.get<User>('/users/me');
+        
         return {
-          access_token: response.data.access_token,
-          token_type: response.data.token_type,
+          ...response.data,
           user: userResponse.data
         };
       }
-      
+
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
@@ -69,16 +72,23 @@ const authService = {
     }
   },
   
-  // Регистрация нового пользователя
-  register: async (userData: RegisterData) => {
+  // Регистрация
+  register: async (data: RegisterData): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>('/api/auth/register', userData);
-      
-      // Сохраняем токен сразу после регистрации
+      const userData = {
+        username: data.username,
+        password: data.password,
+        full_name: data.full_name,
+        phone: data.phone,
+      };
+
+      const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+
+      // Сохраняем токен в localStorage
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
       }
-      
+
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
@@ -92,9 +102,9 @@ const authService = {
   },
   
   // Получение текущего пользователя
-  getCurrentUser: async () => {
+  getCurrentUser: async (): Promise<User> => {
     try {
-      const response = await apiClient.get<User>('/api/users/me');
+      const response = await apiClient.get<User>('/users/me');
       return response.data;
     } catch (error) {
       console.error('Get current user error:', error);
@@ -102,12 +112,14 @@ const authService = {
     }
   },
   
-  // Проверка, авторизован ли пользователь
-  isAuthenticated: () => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return Boolean(localStorage.getItem('token'));
+  // Проверка авторизации
+  isAuthenticated: (): boolean => {
+    return !!localStorage.getItem('token');
+  },
+
+  // Получение токена
+  getToken: (): string | null => {
+    return localStorage.getItem('token');
   },
 };
 

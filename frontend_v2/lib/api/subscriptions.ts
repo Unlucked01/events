@@ -1,64 +1,99 @@
 import apiClient from './client';
 import { User } from './auth';
-import { PaginatedResponse } from './events';
-
-export interface SubscriptionResponse {
-  id: number;
-  follower_id: number;
-  followed_id: number;
-  created_at: string;
-  follower: User;
-  followed: User;
-}
 
 export interface UserSearchParams {
-  page?: number;
-  limit?: number;
   query?: string;
   skip?: number;
+  limit?: number;
+}
+
+export interface SubscriptionDisplay {
+  id: number;
+  follower: User;
+  followed: User;
+  created_at: string;
 }
 
 const subscriptionsService = {
-  // Получение списка подписчиков пользователя
-  getFollowers: async (userId: number, params: UserSearchParams = {}): Promise<PaginatedResponse<SubscriptionResponse> | SubscriptionResponse[]> => {
-    const response = await apiClient.get<PaginatedResponse<SubscriptionResponse> | SubscriptionResponse[]>(`/api/users/${userId}/followers`, { params });
+  // Подписаться на пользователя
+  followUser: async (userId: number): Promise<SubscriptionDisplay> => {
+    const response = await apiClient.post<SubscriptionDisplay>(`/users/${userId}/follow`);
     return response.data;
   },
 
-  // Получение списка подписок пользователя
-  getFollowing: async (userId: number, params: UserSearchParams = {}): Promise<PaginatedResponse<SubscriptionResponse> | SubscriptionResponse[]> => {
-    const response = await apiClient.get<PaginatedResponse<SubscriptionResponse> | SubscriptionResponse[]>(`/api/users/${userId}/following`, { params });
-    return response.data;
+  // Отписаться от пользователя
+  unfollowUser: async (userId: number): Promise<void> => {
+    await apiClient.delete(`/users/${userId}/unfollow`);
   },
 
-  // Подписка на пользователя
-  follow: async (userId: number): Promise<SubscriptionResponse> => {
-    const response = await apiClient.post<SubscriptionResponse>(`/api/users/${userId}/follow`);
-    return response.data;
+  // Получить подписчиков пользователя
+  getFollowers: async (userId: number, params: { skip?: number; limit?: number } = {}): Promise<SubscriptionDisplay[]> => {
+    try {
+      const response = await apiClient.get<SubscriptionDisplay[]>(`/users/${userId}/followers`, { params });
+      console.log('Followers API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get followers error:', error);
+      return [];
+    }
   },
 
-  // Отписка от пользователя
-  unfollow: async (userId: number): Promise<void> => {
-    await apiClient.delete(`/api/users/${userId}/unfollow`);
+  // Получить подписки пользователя
+  getFollowing: async (userId: number, params: { skip?: number; limit?: number } = {}): Promise<SubscriptionDisplay[]> => {
+    try {
+      const response = await apiClient.get<SubscriptionDisplay[]>(`/users/${userId}/following`, { params });
+      console.log('Following API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get following error:', error);
+      return [];
+    }
+  },
+
+  // Проверить, подписан ли текущий пользователь на другого пользователя
+  checkIsFollowing: async (userId: number): Promise<boolean> => {
+    try {
+      const response = await apiClient.get<{ is_following: boolean }>(`/users/${userId}/is-following`);
+      return response.data.is_following;
+    } catch (error) {
+      console.error('Check is following error:', error);
+      return false;
+    }
   },
 
   // Поиск пользователей
-  searchUsers: async (params: UserSearchParams = {}): Promise<PaginatedResponse<User> | User[]> => {
-    // Преобразуем параметры для соответствия API
-    const { query, page, limit, skip, ...rest } = params;
-    const apiParams: any = { ...rest };
-
-    if (query) apiParams.query = query;
-    if (typeof limit === 'number') apiParams.limit = limit;
-    if (typeof skip === 'number') {
-      apiParams.skip = skip;
-    } else if (typeof page === 'number' && typeof limit === 'number') {
-      apiParams.skip = (page - 1) * limit;
+  searchUsers: async (params: UserSearchParams = {}): Promise<User[]> => {
+    try {
+      console.log('Searching users with params:', params);
+      
+      // Backend ожидает обязательный параметр query (минимум 3 символа)
+      if (!params.query || params.query.length < 3) {
+        console.log('Query too short or missing, returning empty array');
+        return [];
+      }
+      
+      const searchParams = {
+        query: params.query,
+        skip: params.skip || 0,
+        limit: params.limit || 10,
+      };
+      
+      console.log('Sending search request with params:', searchParams);
+      const response = await apiClient.get<User[]>('/users/search', { params: searchParams });
+      console.log('Search users API response:', response);
+      
+      // Backend возвращает массив пользователей напрямую
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        console.warn('Unexpected response format from searchUsers API call:', response.data);
+        return [];
+      }
+    } catch (error) {
+      console.error('Search users error:', error);
+      return [];
     }
-
-    const response = await apiClient.get<PaginatedResponse<User> | User[]>('/api/users/search', { params: apiParams });
-    return response.data;
-  }
+  },
 };
 
 export default subscriptionsService; 

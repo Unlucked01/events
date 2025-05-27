@@ -36,6 +36,7 @@ import { subscriptionsService, authService } from '@/lib/api';
 import { User } from '@/lib/api/auth';
 import { resolveImageUrl } from '@/lib/utils/image';
 import UserAvatar from '@/components/UserAvatar';
+import { useRouter } from 'next/navigation';
 
 export default function SubscriptionsPage() {
   const [tabValue, setTabValue] = useState(0);
@@ -47,59 +48,64 @@ export default function SubscriptionsPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [followingIds, setFollowingIds] = useState<number[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     // Load the current user and their subscriptions
     const loadUserData = async () => {
       setLoading(true);
       try {
-        // Get current user
+        if (!authService.isAuthenticated()) {
+          router.push('/auth/login');
+          return;
+        }
+        
         const user = await authService.getCurrentUser();
         setCurrentUser(user);
         
-        // Load followers
-        const followersData = await subscriptionsService.getFollowers(user.id);
+        // Получаем подписчиков
+        const followersResponse = await subscriptionsService.getFollowers(user.id, {
+          skip: 0,
+          limit: 100
+        });
         
-        // API returns an array directly, not a paginated response with 'items'
-        const followersList = Array.isArray(followersData) 
-          ? followersData.map(subscription => subscription.follower)
-          : followersData.items 
-            ? followersData.items.map(subscription => subscription.follower)
-            : [];
-        setFollowers(followersList);
+        // followersResponse - это массив SubscriptionDisplay
+        const followerUsers = followersResponse.map(subscription => subscription.follower);
+        setFollowers(followerUsers);
         
-        // Load following
-        const followingData = await subscriptionsService.getFollowing(user.id);
+        // Получаем подписки
+        const followingResponse = await subscriptionsService.getFollowing(user.id, {
+          skip: 0,
+          limit: 100
+        });
         
-        // API returns an array directly, not a paginated response with 'items'
-        const followingList = Array.isArray(followingData)
-          ? followingData.map(subscription => subscription.followed)
-          : followingData.items
-            ? followingData.items.map(subscription => subscription.followed)
-            : [];
-        setFollowing(followingList);
+        // followingResponse - это массив SubscriptionDisplay
+        const followingUsers = followingResponse.map(subscription => subscription.followed);
+        setFollowing(followingUsers);
         
-        // Extract following IDs for easy checking
-        setFollowingIds(followingList.map(user => user.id));
+        // Создаем список ID пользователей, на которых подписан текущий пользователь
+        const followingUserIds = followingUsers.map(user => user.id);
+        setFollowingIds(followingUserIds);
+        
       } catch (error) {
-        console.error("Error loading subscriptions data:", error);
+        console.error('Error loading user data:', error);
       } finally {
         setLoading(false);
       }
     };
     
     loadUserData();
-  }, []);
+  }, [router]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
+    const term = e.target.value;
     setSearchTerm(term);
     
-    if (term.trim() === '') {
+    if (term.length < 3) {
       setSearchResults([]);
       return;
     }
@@ -107,12 +113,8 @@ export default function SubscriptionsPage() {
     setSearchLoading(true);
     try {
       const results = await subscriptionsService.searchUsers({ query: term });
-      // Handle both array and paginated responses
-      if (Array.isArray(results)) {
-        setSearchResults(results);
-      } else {
-        setSearchResults(results.items || []);
-      }
+      // searchUsers теперь всегда возвращает массив User[]
+      setSearchResults(results);
     } catch (error) {
       console.error("Error searching users:", error);
       setSearchResults([]);
@@ -132,12 +134,12 @@ export default function SubscriptionsPage() {
     try {
       if (followingIds.includes(userId)) {
         // Unfollow user
-        await subscriptionsService.unfollow(userId);
+        await subscriptionsService.unfollowUser(userId);
         setFollowingIds(prev => prev.filter(id => id !== userId));
         setFollowing(prev => prev.filter(user => user.id !== userId));
       } else {
         // Follow user
-        const response = await subscriptionsService.follow(userId);
+        const response = await subscriptionsService.followUser(userId);
         setFollowingIds(prev => [...prev, userId]);
         
         // Find the user from search results or followers

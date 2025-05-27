@@ -79,7 +79,7 @@ const eventsService = {
   getEvents: async (params: EventListParams = {}): Promise<PaginatedResponse<Event>> => {
     try {
       console.log('Fetching all events with params:', params);
-      const response = await apiClient.get<any>('/api/events', { params });
+      const response = await apiClient.get<any>('/events', { params });
       console.log('Events API response:', response);
       console.log(response)
       if (response.data) {
@@ -104,7 +104,7 @@ const eventsService = {
   getFeedEvents: async (params: EventListParams = {}): Promise<PaginatedResponse<Event>> => {
     try {
       console.log('Fetching feed events with params:', params);
-      const response = await apiClient.get<any>('/api/events/feed', { params });
+      const response = await apiClient.get<any>('/events/feed', { params });
       console.log('Feed events API response:', response);
       
       // Проверяем структуру ответа
@@ -143,7 +143,7 @@ const eventsService = {
   getUserEvents: async (userId: number, params: EventListParams = {}): Promise<PaginatedResponse<Event>> => {
     try {
       console.log(`Fetching user events for userId=${userId} with params:`, params);
-      const response = await apiClient.get<any>(`/api/events/users/${userId}`, { params });
+      const response = await apiClient.get<any>(`/events/users/${userId}`, { params });
       console.log(`User events API response:`, response);
       
       // Проверяем структуру ответа
@@ -178,7 +178,7 @@ const eventsService = {
 
   // Получение информации о конкретном событии
   getEvent: async (id: number): Promise<EventResponse> => {
-    const response = await apiClient.get<EventResponse>(`/api/events/${id}`);
+    const response = await apiClient.get<EventResponse>(`/events/${id}`);
     return response.data;
   },
 
@@ -207,7 +207,7 @@ const eventsService = {
       });
     }
     
-    const response = await apiClient.post<Event>('/api/events', formData, {
+    const response = await apiClient.post<Event>('/events', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -244,7 +244,7 @@ const eventsService = {
       });
     }
     
-    const response = await apiClient.put<Event>(`/api/events/${id}`, formData, {
+    const response = await apiClient.put<Event>(`/events/${id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -255,27 +255,27 @@ const eventsService = {
 
   // Удаление события
   deleteEvent: async (id: number): Promise<void> => {
-    await apiClient.delete(`/api/events/${id}`);
+    await apiClient.delete(`/events/${id}`);
   },
 
   // Удаление изображения события
   deleteEventImage: async (eventId: number, imageId: number): Promise<void> => {
-    await apiClient.delete(`/api/events/${eventId}/images/${imageId}`);
+    await apiClient.delete(`/events/${eventId}/images/${imageId}`);
   },
 
   // Присоединение к событию
   joinEvent: async (id: number): Promise<void> => {
-    await apiClient.post(`/api/events/${id}/join`);
+    await apiClient.post(`/events/${id}/join`);
   },
 
   // Отказ от участия в событии
   leaveEvent: async (id: number): Promise<void> => {
-    await apiClient.delete(`/api/events/${id}/leave`);
+    await apiClient.delete(`/events/${id}/leave`);
   },
 
   // Получение списка участников события
   getEventParticipants: async (eventId: number): Promise<ParticipantResponse[]> => {
-    const response = await apiClient.get<ParticipantResponse[]>(`/api/events/${eventId}/participants`);
+    const response = await apiClient.get<ParticipantResponse[]>(`/events/${eventId}/participants`);
     return response.data;
   },
 
@@ -291,11 +291,11 @@ const eventsService = {
         ...params
       };
       
-      console.log('🔍 SEARCH REQUEST to /api/events/search with params:', searchParams);
-      const response = await apiClient.get<Event[]>('/api/events/search', { params: searchParams });
-      console.log('🔍 SEARCH RESPONSE from /api/events/search:', response);
+      console.log('🔍 SEARCH REQUEST to /events/search with params:', searchParams);
+      const response = await apiClient.get<Event[]>('/events/search', { params: searchParams });
+      console.log('🔍 SEARCH RESPONSE from /events/search:', response);
       
-      // Поскольку /api/events/search возвращает массив, а не PaginatedResponse,
+      // Поскольку /events/search возвращает массив, а не PaginatedResponse,
       // оборачиваем результат в формат PaginatedResponse
       if (Array.isArray(response.data)) {
         return {

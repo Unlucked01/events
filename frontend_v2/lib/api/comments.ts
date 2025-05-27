@@ -1,15 +1,13 @@
 import apiClient from './client';
 import { User } from './auth';
-import { PaginatedResponse } from './events';
 
 export interface Comment {
   id: number;
   text: string;
-  event_id: number;
-  user_id: number;
   created_at: string;
   updated_at: string;
   user: User;
+  event_id: number;
 }
 
 export interface CommentCreateData {
@@ -20,34 +18,38 @@ export interface CommentUpdateData {
   text: string;
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
 const commentsService = {
-  // Получение комментариев к событию
-  getEventComments: async (eventId: number, page = 1, limit = 10): Promise<PaginatedResponse<Comment> | Comment[]> => {
-    const response = await apiClient.get<PaginatedResponse<Comment> | Comment[]>(`/api/events/${eventId}/comments`, {
-      params: { page, limit },
+  // Get comments for an event
+  getEventComments: async (eventId: number, skip = 0, limit = 100): Promise<Comment[]> => {
+    const response = await apiClient.get<PaginatedResponse<Comment> | Comment[]>(`/events/${eventId}/comments`, {
+      params: { skip, limit },
     });
-    return response.data;
+    return Array.isArray(response.data) ? response.data : response.data.items;
   },
 
-  // Создание нового комментария
+  // Create a new comment
   createComment: async (eventId: number, data: CommentCreateData): Promise<Comment> => {
-    const response = await apiClient.post<Comment>(`/api/events/${eventId}/comments`, data);
+    const response = await apiClient.post<Comment>(`/events/${eventId}/comments`, data);
     return response.data;
   },
 
-  // Обновление комментария
-  updateComment: async (
-    eventId: number,
-    commentId: number,
-    data: CommentUpdateData
-  ): Promise<Comment> => {
-    const response = await apiClient.put<Comment>(`/api/events/${eventId}/comments/${commentId}`, data);
+  // Update a comment
+  updateComment: async (eventId: number, commentId: number, data: CommentUpdateData): Promise<Comment> => {
+    const response = await apiClient.put<Comment>(`/events/${eventId}/comments/${commentId}`, data);
     return response.data;
   },
 
-  // Удаление комментария
+  // Delete a comment
   deleteComment: async (eventId: number, commentId: number): Promise<void> => {
-    await apiClient.delete(`/api/events/${eventId}/comments/${commentId}`);
+    await apiClient.delete(`/events/${eventId}/comments/${commentId}`);
   }
 };
 

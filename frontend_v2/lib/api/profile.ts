@@ -1,29 +1,29 @@
 import apiClient from './client';
 import { User } from './auth';
 
-export interface UpdateProfileData {
+export interface ProfileUpdateData {
   username?: string;
   full_name?: string;
   phone?: string;
-  telegram_username?: string;
+  profile_picture?: File;
 }
 
-export interface ChangePasswordData {
+export interface PasswordChangeData {
   current_password: string;
   new_password: string;
 }
 
 const profileService = {
-  // Обновление профиля пользователя (без аватара)
-  updateProfile: async (data: UpdateProfileData): Promise<User> => {
+  // Обновление профиля
+  updateProfile: async (data: ProfileUpdateData): Promise<User> => {
     const formData = new FormData();
     
     if (data.username) formData.append('username', data.username);
     if (data.full_name) formData.append('full_name', data.full_name);
     if (data.phone) formData.append('phone', data.phone);
-    if (data.telegram_username) formData.append('telegram_username', data.telegram_username);
+    if (data.profile_picture) formData.append('profile_picture', data.profile_picture);
     
-    const response = await apiClient.put<User>('/api/users/me', formData, {
+    const response = await apiClient.put<User>('/users/me', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -32,12 +32,12 @@ const profileService = {
     return response.data;
   },
 
-  // Обновление аватара профиля
-  updateProfilePicture: async (avatar: File): Promise<User> => {
+  // Обновление аватара
+  updateProfilePicture: async (file: File): Promise<User> => {
     const formData = new FormData();
-    formData.append('profile_picture', avatar);
+    formData.append('profile_picture', file);
     
-    const response = await apiClient.put<User>('/api/users/me/profile-picture', formData, {
+    const response = await apiClient.put<User>('/users/me/profile-picture', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -47,15 +47,15 @@ const profileService = {
   },
 
   // Изменение пароля
-  changePassword: async (data: ChangePasswordData): Promise<void> => {
-    await apiClient.post('/api/users/me/change-password', data);
+  changePassword: async (data: PasswordChangeData): Promise<void> => {
+    await apiClient.post('/users/me/change-password', data);
   },
 
-  // Получение профиля другого пользователя
+  // Получение профиля пользователя по ID
   getUserProfile: async (userId: number): Promise<User> => {
-    const response = await apiClient.get<User>(`/api/users/${userId}`);
+    const response = await apiClient.get<User>(`/users/${userId}`);
     return response.data;
-  }
+  },
 };
 
 export default profileService; 

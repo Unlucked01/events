@@ -27,6 +27,9 @@ BASE_URL = os.getenv("BASE_URL", "https://unl-events.duckdns.org")
 VPS_API_URL = os.getenv("VPS_API_URL", "http://unl-events.duckdns.org:5000")
 VPS_API_KEY = os.getenv("VPS_API_KEY", "your-secret-api-key")
 
+# Check if we're in local development mode
+IS_LOCAL_DEV = "localhost" in BASE_URL or "127.0.0.1" in BASE_URL
+
 # We'll keep these for local development, but primarily use the VPS forwarding
 bot = None
 dp = None
@@ -170,22 +173,35 @@ class TelegramController:
             
             # Format message
             event_date = event.event_date.strftime("%d.%m.%Y %H:%M")
-            message = (
-                f"🎉 <b>Новое приглашение на мероприятие!</b>\n\n"
-                f"<b>{event.title}</b>\n"
-                f"📅 {event_date}\n"
-                f"📍 {event.location}\n"
-                f"👤 Организатор: {creator.full_name}\n\n"
-                f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
-            )
-            
-            # Create inline keyboard
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
-                    text="Открыть на сайте", 
-                    url=f"{base_url}/events/{event_id}"
+            if IS_LOCAL_DEV:
+                # For local development, include URL in message text instead of inline button
+                message = (
+                    f"🎉 <b>Новое приглашение на мероприятие!</b>\n\n"
+                    f"<b>{event.title}</b>\n"
+                    f"📅 {event_date}\n"
+                    f"📍 {event.location}\n"
+                    f"👤 Организатор: {creator.full_name}\n\n"
+                    f"Ссылка на мероприятие: {base_url}/events/{event_id}\n\n"
+                    f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
                 )
-            ]])
+                keyboard = None
+            else:
+                # For production, use inline keyboard
+                message = (
+                    f"🎉 <b>Новое приглашение на мероприятие!</b>\n\n"
+                    f"<b>{event.title}</b>\n"
+                    f"📅 {event_date}\n"
+                    f"📍 {event.location}\n"
+                    f"👤 Организатор: {creator.full_name}\n\n"
+                    f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
+                )
+                # Create inline keyboard
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(
+                        text="Открыть на сайте", 
+                        url=f"{base_url}/events/{event_id}"
+                    )
+                ]])
             
             # Send message if user has telegram_chat_id
             if await TelegramController._try_send_message(user, message, keyboard):
@@ -228,21 +244,33 @@ class TelegramController:
             
             # Format message
             event_date = event.event_date.strftime("%d.%m.%Y %H:%M")
-            message = (
-                f"⏰ <b>Напоминание о мероприятии!</b>\n\n"
-                f"<b>{event.title}</b>\n"
-                f"📅 {event_date} (через {hours_before} ч.)\n"
-                f"📍 {event.location}\n\n"
-                f"Не забудьте посетить мероприятие!"
-            )
-            
-            # Create inline keyboard
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
-                    text="Открыть на сайте", 
-                    url=f"{base_url}/events/{event_id}"
+            if IS_LOCAL_DEV:
+                # For local development, include URL in message text
+                message = (
+                    f"⏰ <b>Напоминание о мероприятии!</b>\n\n"
+                    f"<b>{event.title}</b>\n"
+                    f"📅 {event_date} (через {hours_before} ч.)\n"
+                    f"📍 {event.location}\n\n"
+                    f"Ссылка на мероприятие: {base_url}/events/{event_id}\n\n"
+                    f"Не забудьте посетить мероприятие!"
                 )
-            ]])
+                keyboard = None
+            else:
+                # For production, use inline keyboard
+                message = (
+                    f"⏰ <b>Напоминание о мероприятии!</b>\n\n"
+                    f"<b>{event.title}</b>\n"
+                    f"📅 {event_date} (через {hours_before} ч.)\n"
+                    f"📍 {event.location}\n\n"
+                    f"Не забудьте посетить мероприятие!"
+                )
+                # Create inline keyboard
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(
+                        text="Открыть на сайте", 
+                        url=f"{base_url}/events/{event_id}"
+                    )
+                ]])
             
             # Send messages to participants
             sent_count = 0
@@ -389,32 +417,56 @@ class TelegramController:
             
             # Format message
             event_date = event.event_date.strftime("%d.%m.%Y %H:%M")
-            if is_update:
-                message = (
-                    f"🔄 <b>Обновление мероприятия от {creator.full_name}</b>\n\n"
-                    f"<b>{event.title}</b>\n"
-                    f"📅 {event_date}\n"
-                    f"📍 {event.location}\n\n"
-                    f"Пользователь, на которого вы подписаны, обновил информацию о мероприятии. "
-                    f"Посетите сайт, чтобы узнать актуальные подробности."
-                )
+            if IS_LOCAL_DEV:
+                # For local development, include URL in message text
+                if is_update:
+                    message = (
+                        f"🔄 <b>Обновление мероприятия от {creator.full_name}</b>\n\n"
+                        f"<b>{event.title}</b>\n"
+                        f"📅 {event_date}\n"
+                        f"📍 {event.location}\n\n"
+                        f"Ссылка на мероприятие: {base_url}/events/{event_id}\n\n"
+                        f"Пользователь, на которого вы подписаны, обновил информацию о мероприятии. "
+                        f"Посетите сайт, чтобы узнать актуальные подробности."
+                    )
+                else:
+                    message = (
+                        f"🔔 <b>Новое мероприятие от {creator.full_name}</b>\n\n"
+                        f"<b>{event.title}</b>\n"
+                        f"📅 {event_date}\n"
+                        f"📍 {event.location}\n\n"
+                        f"Ссылка на мероприятие: {base_url}/events/{event_id}\n\n"
+                        f"Пользователь, на которого вы подписаны, создал новое мероприятие. "
+                        f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
+                    )
+                keyboard = None
             else:
-                message = (
-                    f"🔔 <b>Новое мероприятие от {creator.full_name}</b>\n\n"
-                    f"<b>{event.title}</b>\n"
-                    f"📅 {event_date}\n"
-                    f"📍 {event.location}\n\n"
-                    f"Пользователь, на которого вы подписаны, создал новое мероприятие. "
-                    f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
-                )
-            
-            # Create inline keyboard
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
-                    text="Открыть на сайте", 
-                    url=f"{base_url}/events/{event_id}"
-                )
-            ]])
+                # For production, use inline keyboard
+                if is_update:
+                    message = (
+                        f"🔄 <b>Обновление мероприятия от {creator.full_name}</b>\n\n"
+                        f"<b>{event.title}</b>\n"
+                        f"📅 {event_date}\n"
+                        f"📍 {event.location}\n\n"
+                        f"Пользователь, на которого вы подписаны, обновил информацию о мероприятии. "
+                        f"Посетите сайт, чтобы узнать актуальные подробности."
+                    )
+                else:
+                    message = (
+                        f"🔔 <b>Новое мероприятие от {creator.full_name}</b>\n\n"
+                        f"<b>{event.title}</b>\n"
+                        f"📅 {event_date}\n"
+                        f"📍 {event.location}\n\n"
+                        f"Пользователь, на которого вы подписаны, создал новое мероприятие. "
+                        f"Посетите сайт, чтобы узнать подробности и подтвердить участие."
+                    )
+                # Create inline keyboard
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(
+                        text="Открыть на сайте", 
+                        url=f"{base_url}/events/{event_id}"
+                    )
+                ]])
             
             # Send notification to each follower
             sent_count = 0

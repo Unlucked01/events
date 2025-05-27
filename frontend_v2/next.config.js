@@ -3,12 +3,20 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['unl-events.duckdns.org'], // Убираем localhost и оставляем только production домен
+    unoptimized: true,
+    domains: ['localhost'],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'unl-events.duckdns.org',
-        pathname: '/**',
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/static/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'backend',
+        port: '8000',
+        pathname: '/static/uploads/**',
       },
     ],
   },

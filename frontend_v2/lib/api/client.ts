@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // Базовый URL API
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org/';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://unl-events.duckdns.org';
 
 // Создаем экземпляр axios с базовыми настройками
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
