@@ -1,20 +1,33 @@
 services:
-  # Backend API service
+  db:
+    image: postgres:15
+    container_name: events_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: events_db
+    volumes:
+      - events_db_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
   backend:
     build: ./backend
-    container_name: events-backend
+    container_name: events_backend
     env_file:
       - ./backend/.env
     environment:
       - BASE_URL=https://unl-events.duckdns.org
-      - DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/events_db
-      - DATABASE_HOST=host.docker.internal
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/events_db
+      - DATABASE_HOST=db
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
       - DATABASE_NAME=events_db
+    depends_on:
+      - db
     ports:
-      - "8001:8000"  # Изменили порт чтобы не конфликтовать с PC Configurator
+      - "8001:8000"
     restart: unless-stopped
     volumes:
       - ./backend:/app
@@ -26,19 +39,16 @@ services:
       retries: 3
       start_period: 40s
 
-  # Frontend service
   frontend:
     build: ./frontend_v2
-    container_name: events-frontend
+    container_name: events_frontend
     ports:
-      - "3001:3000"  # Изменили порт чтобы не конфликтовать с PC Configurator
+      - "3001:3000"
     environment:
       - NEXT_PUBLIC_API_URL=https://unl-events.duckdns.org/api
       - NODE_ENV=production
-    depends_on:
-      - backend
     restart: always
 
-# Define volumes
 volumes:
-  uploads_data:  # For persisting uploads
+  uploads_data:
+  events_db_data:
